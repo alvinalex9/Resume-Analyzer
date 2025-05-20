@@ -10,11 +10,12 @@ from sklearn.feature_extraction.text import TfidfVectorizer, CountVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 
 app = Flask(__name__)
-app.config['UPLOAD_FOLDER'] = 'uploads'
-app.config['REPORT_FOLDER'] = 'reports'
+app.config['UPLOAD_FOLDER'] = './uploads'
+app.config['REPORT_FOLDER'] = './reports'
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 os.makedirs(app.config['REPORT_FOLDER'], exist_ok=True)
 os.makedirs("static/images", exist_ok=True)
+
 
 def extract_text_from_pdf(pdf_path):
     doc = fitz.open(pdf_path)
@@ -22,12 +23,13 @@ def extract_text_from_pdf(pdf_path):
 
 def generate_wordcloud(text, path):
     wc = WordCloud(width=400, height=200, background_color='white').generate(text)
-    wc.to_file(path)
+    wc.to_file(os.path.join("static/images", path))
 
 def generate_snapshot(pdf_path, image_path):
     doc = fitz.open(pdf_path)
     pix = doc[0].get_pixmap()
-    pix.save(image_path)
+    pix.save(os.path.join("static/images", image_path))
+
 
 def calculate_similarity(text1, text2):
     tfidf = TfidfVectorizer(stop_words='english')
@@ -106,11 +108,12 @@ def generate_report(candidate_name, email, job_title, score, section_results, wo
     template.add_paragraph("Section Analysis:")
     for section, result in section_results.items():
         template.add_paragraph(f"✔️ {section}" if result else f"❌ {section}")
-    template.add_picture(donut_path, width=Inches(3.5))
-    template.add_picture(wordcloud_path, width=Inches(3.5))
-    template.add_picture(resume_img, width=Inches(2.5))
-    template.add_picture(jd_img, width=Inches(2.5))
+    template.add_picture(os.path.join("static/images", wordcloud_path), width=Inches(3.5))
+    template.add_picture(os.path.join("static/images", resume_img), width=Inches(2.5))
+    template.add_picture(os.path.join("static/images", jd_img), width=Inches(2.5))
+    template.add_picture(os.path.join("static/images", donut_path), width=Inches(3.5))
     template.save(output_path)
+
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
@@ -122,6 +125,7 @@ def index():
         job = request.form['job_title']
         resume_path = os.path.join(app.config['UPLOAD_FOLDER'], secure_filename(resume.filename))
         jd_path = os.path.join(app.config['UPLOAD_FOLDER'], secure_filename(jd.filename))
+
         resume.save(resume_path)
         jd.save(jd_path)
         resume_text = extract_text_from_pdf(resume_path)
@@ -161,5 +165,5 @@ def download_report():
     return send_file(latest, as_attachment=True)
 
 if __name__ == '__main__':
-    print('✅ Flask server running on http://localhost:5000')
-    app.run(debug=True)
+    app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)), threaded=True)
+
