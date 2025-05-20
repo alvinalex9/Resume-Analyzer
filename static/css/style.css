@@ -1,0 +1,77 @@
+
+body {
+  font-family: 'Segoe UI', sans-serif;
+  margin: 0; padding: 0; background: #f5f5f5;
+}
+header {
+  background: #1c1c1c;
+  color: white;
+  padding: 15px;
+  display: flex;
+  align-items: center;
+}
+.ey-logo {
+  height: 70px;
+  margin-right: 70px;
+}
+.ey-title h1 { margin: 0; font-size: 20px; }
+.ey-title p { margin: 0; font-size: 13px; color: #ccc; }
+.home-button {
+  margin-left: auto;
+  padding: 10px;
+  background: #ffcf01;
+  color: black;
+  font-weight: bold;
+  text-decoration: none;
+}
+.container {
+  display: flex;
+  flex-wrap: wrap;
+  margin: 20px;
+}
+.panel {
+  background: white;
+  margin: 10px;
+  padding: 20px;
+  border-radius: 10px;
+  flex: 1;
+  min-width: 300px;
+}
+input, button {
+  display: block;
+  width: 100%;
+  padding: 10px;
+  margin: 10px 0;
+}
+button {
+  background: #ffcf01;
+  border: none;
+  font-weight: bold;
+  cursor: pointer;
+}
+.chart-img {
+  width: 100%;
+  max-width: 300px;
+  display: block;
+  margin: auto;
+}
+.score-label {
+  text-align: center;
+  font-size: 24px;
+  font-weight: bold;
+}
+.download-btn {
+  display: inline-block;
+  margin-top: 20px;
+  padding: 10px;
+  background: #ffcf01;
+  color: black;
+  font-weight: bold;
+  text-decoration: none;
+}
+footer {
+  background: #1c1c1c;
+  color: #ccc;
+  padding: 10px;
+  text-align: center;
+}

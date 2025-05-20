@@ -1,0 +1,8 @@
+
+flask
+python-docx
+pymupdf
+wordcloud
+scikit-learn
+matplotlib
+pandas

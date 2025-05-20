@@ -1,0 +1,83 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Company Name - Resume Score Analyzer</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+  <header>
+    <img src="{{ url_for('static', filename='images/ey_logo.jpg') }}" class="ey-logo">
+    <div class="ey-title">
+      <h1>Company Name</h1>
+      <p>Resume Score Analyzer</p>
+    </div>
+    {% if score %}
+    <a href="/" class="home-button">🔁 Home</a>
+    {% endif %}
+  </header>
+
+  <div class="container">
+    {% if not score %}<div class="panel upload">
+      <form action="/" method="post" enctype="multipart/form-data">
+        <label>Upload Resume (PDF)</label>
+        <input type="file" name="resume" required>
+        <label>Upload JD (PDF)</label>
+        <input type="file" name="jd" required>
+        <input type="text" name="candidate_name" placeholder="Candidate Name" required>
+        <input type="email" name="email" placeholder="Email" required>
+        <input type="text" name="job_title" placeholder="Job Title" required>
+        <button type="submit">Analyze</button>
+      </form>
+    </div>{% endif %}
+
+    {% if score %}
+    <div class="panel score">
+      <h2>Resume Scoring</h2>
+      <img src="{{ url_for('static', filename='images/donut.png') }}" class="chart-img">
+      <p class="score-label">{{ score }}%</p>
+
+      <div class="recommendation">
+        <h3>Recommendation</h3>
+        <p>{{ recommendation }}</p>
+      </div>
+
+      <div class="keywords">
+        <h3>Missing Keywords</h3>
+        <ul>{% for kw in missing_keywords %}<li>❗ {{ kw }}</li>{% endfor %}</ul>
+      </div>
+    </div>
+
+    <div class="panel sidebar">
+      <h3>Results Analysis</h3>
+      <ul>
+        {% for sec, val in section_results.items() %}
+        <li>{{ '✔️' if val else '❌' }} {{ sec }}</li>
+        {% endfor %}
+      </ul>
+
+      <h3>Section Strength</h3>
+      <img src="{{ url_for('static', filename='images/section_bar.png') }}" class="chart-img">
+
+      <h3>Word Cloud</h3>
+      <img src="{{ url_for('static', filename='images/wordcloud.png') }}" class="chart-img">
+
+      <h3>Smart Tips</h3>
+      <ul>
+        <li>✅ Use job-specific keywords</li>
+        <li>📌 Quantify achievements</li>
+        <li>📧 Contact info is critical</li>
+        <li>🧠 ATS-friendly formatting</li>
+      </ul>
+
+      <a class="download-btn" href="{{ url_for('download_report') }}">📥 Download Report</a>
+    </div>
+    {% endif %}
+  </div>
+
+  <footer>
+    <p>🔒 Disclaimer:This output is for internal or illustrative use.It does not reflect official recommendations for candidate selection.</p>
+  </footer>
+</body>
+</html>
