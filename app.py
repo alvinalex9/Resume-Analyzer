@@ -152,18 +152,19 @@ def index():
             print(f"✅ Section Results: {section_results}")
 
             # Generate Visuals and Report Paths
-            wordcloud_path = os.path.join("static", "images", "wordcloud.png")
-            resume_snapshot = os.path.join("static", "images", "resume.png")
-            jd_snapshot = os.path.join("static", "images", "jd.png")
-            donut_path = os.path.join("static", "images", "donut.png")
-            section_bar_path = os.path.join("static", "images", "section_bar.png")
-
+            wordcloud_path = "static/images/wordcloud.png"
+            resume_snapshot = "static/images/resume.png"
+            jd_snapshot = "static/images/jd.png"
+            donut_path = "static/images/donut.png"
+            section_bar_path = "static/images/section_bar.png"
+            
             # Generate Visuals
-            generate_wordcloud(jd_text, wordcloud_path)
-            generate_snapshot(resume_path, resume_snapshot)
-            generate_snapshot(jd_path, jd_snapshot)
-            save_score_donut(score, donut_path)
-            save_section_bar_chart(section_results, section_bar_path)
+            generate_wordcloud(jd_text, os.path.join("static/images", "wordcloud.png"))
+            generate_snapshot(resume_path, os.path.join("static/images", "resume.png"))
+            generate_snapshot(jd_path, os.path.join("static/images", "jd.png"))
+            save_score_donut(score, os.path.join("static/images", "donut.png"))
+            save_section_bar_chart(section_results, os.path.join("static/images", "section_bar.png"))
+
 
             print("✅ Visuals generated successfully.")
 
