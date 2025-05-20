@@ -20,16 +20,15 @@
 
   <div class="container">
     {% if not score %}<div class="panel upload">
-      <form action="/" method="post" enctype="multipart/form-data">
-        <label>Upload Resume (PDF)</label>
+     <form method="POST" enctype="multipart/form-data">
         <input type="file" name="resume" required>
-        <label>Upload JD (PDF)</label>
         <input type="file" name="jd" required>
         <input type="text" name="candidate_name" placeholder="Candidate Name" required>
         <input type="email" name="email" placeholder="Email" required>
         <input type="text" name="job_title" placeholder="Job Title" required>
-        <button type="submit">Analyze</button>
-      </form>
+        <button type="submit">Submit</button>
+    </form>
+
     </div>{% endif %}
 
     {% if score %}
@@ -61,7 +60,7 @@
       <img src="{{ url_for('static', filename='images/section_bar.png') }}" class="chart-img">
 
       <h3>Word Cloud</h3>
-      <img src="{{ url_for('static', filename='images/wordcloud.png') }}" class="chart-img">
+      <img src="{{ url_for('static', filename='images/wordcloud.png') }}" alt="Wordcloud">
 
       <h3>Smart Tips</h3>
       <ul>
