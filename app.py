@@ -148,6 +148,9 @@ def index():
             resume_text = extract_text_from_pdf(resume_path)
             jd_text = extract_text_from_pdf(jd_path)
 
+            if not jd_text.strip():
+                return "Error: Job Description (JD) is empty. Please upload a valid file.", 400
+
             print("✅ Text extracted from PDFs.")
 
             # Calculate Resume Score
@@ -158,33 +161,17 @@ def index():
             print(f"✅ Score Calculated: {score}%")
             print(f"✅ Section Results: {section_results}")
 
-            # Generate Visuals and Report Paths
-            wordcloud_path = "static/images/wordcloud.png"
-            resume_snapshot = "static/images/resume.png"
-            jd_snapshot = "static/images/jd.png"
-            donut_path = "static/images/donut.png"
-            section_bar_path = "static/images/section_bar.png"
-            
-           # Generate Visuals
-            wordcloud = generate_wordcloud(jd.read().decode(), 'wordcloud.png')
+            # Generate Visuals
+            wordcloud = generate_wordcloud(jd_text, 'wordcloud.png')
             resume_snapshot = generate_snapshot(resume_path, 'resume.png')
             jd_snapshot = generate_snapshot(jd_path, 'jd.png')
-            donut = save_score_donut(85, 'donut.png')
-
+            donut = save_score_donut(score, 'donut.png')
 
             print("✅ Visuals generated successfully.")
 
             # Generate Recommendations
             recommendation = generate_recommendation(score, section_results)
             print(f"✅ Recommendation Generated: {recommendation}")
-
-            # Generate Report Path and File
-            report_filename = f"{name.replace(' ', '_')}_report.docx"
-            report_path = os.path.join(app.config['REPORT_FOLDER'], report_filename)
-            generate_report(name, email, job, score, section_results, 
-                            wordcloud_path, resume_snapshot, jd_snapshot, donut_path, report_path)
-
-            print(f"✅ Report generated at {report_path}")
 
             # Return Rendered Result Page
             return render_template('index.html',
