@@ -118,44 +118,84 @@ def generate_report(candidate_name, email, job_title, score, section_results, wo
 @app.route('/', methods=['GET', 'POST'])
 def index():
     if request.method == 'POST':
-        resume = request.files['resume']
-        jd = request.files['jd']
-        name = request.form['candidate_name']
-        email = request.form['email']
-        job = request.form['job_title']
-        resume_path = os.path.join(app.config['UPLOAD_FOLDER'], secure_filename(resume.filename))
-        jd_path = os.path.join(app.config['UPLOAD_FOLDER'], secure_filename(jd.filename))
+        try:
+            # Ensure Form Fields are Provided
+            resume = request.files.get('resume')
+            jd = request.files.get('jd')
+            name = request.form.get('candidate_name')
+            email = request.form.get('email')
+            job = request.form.get('job_title')
 
-        resume.save(resume_path)
-        jd.save(jd_path)
-        resume_text = extract_text_from_pdf(resume_path)
-        jd_text = extract_text_from_pdf(jd_path)
-        score = calculate_similarity(resume_text, jd_text)
-        section_results = detect_resume_sections(resume_text)
-        missing_keywords = extract_missing_keywords(jd_text, resume_text)
-        wordcloud_path = os.path.join("static", "images", "wordcloud.png")
-        resume_snapshot = os.path.join("static", "images", "resume.png")
-        jd_snapshot = os.path.join("static", "images", "jd.png")
-        donut_path = os.path.join("static", "images", "donut.png")
-        section_bar_path = os.path.join("static", "images", "section_bar.png")
-        generate_wordcloud(jd_text, wordcloud_path)
-        generate_snapshot(resume_path, resume_snapshot)
-        generate_snapshot(jd_path, jd_snapshot)
-        save_score_donut(score, donut_path)
-        save_section_bar_chart(section_results, section_bar_path)
-        recommendation = generate_recommendation(score, section_results)
-        report_path = os.path.join(app.config['REPORT_FOLDER'], f"{name.replace(' ', '_')}_report.docx")
-        generate_report(name, email, job, score, section_results, wordcloud_path, resume_snapshot, jd_snapshot, donut_path, report_path)
-        return render_template('index.html',
-                               score=score,
-                               section_results=section_results,
-                               missing_keywords=missing_keywords,
-                               recommendation=recommendation,
-                               donut=donut_path,
-                               section_bar=section_bar_path,
-                               wordcloud=wordcloud_path,
-                               resume_snapshot=resume_snapshot,
-                               jd_snapshot=jd_snapshot)
+            if not (resume and jd and name and email and job):
+                return "Error: All fields are required.", 400
+
+            # Save Uploaded Files Securely
+            resume_path = os.path.join(app.config['UPLOAD_FOLDER'], secure_filename(resume.filename))
+            jd_path = os.path.join(app.config['UPLOAD_FOLDER'], secure_filename(jd.filename))
+            resume.save(resume_path)
+            jd.save(jd_path)
+
+            print("✅ Files saved successfully.")
+
+            # Extract Text from PDF Files
+            resume_text = extract_text_from_pdf(resume_path)
+            jd_text = extract_text_from_pdf(jd_path)
+
+            print("✅ Text extracted from PDFs.")
+
+            # Calculate Resume Score
+            score = calculate_similarity(resume_text, jd_text)
+            section_results = detect_resume_sections(resume_text)
+            missing_keywords = extract_missing_keywords(jd_text, resume_text)
+
+            print(f"✅ Score Calculated: {score}%")
+            print(f"✅ Section Results: {section_results}")
+
+            # Generate Visuals and Report Paths
+            wordcloud_path = os.path.join("static", "images", "wordcloud.png")
+            resume_snapshot = os.path.join("static", "images", "resume.png")
+            jd_snapshot = os.path.join("static", "images", "jd.png")
+            donut_path = os.path.join("static", "images", "donut.png")
+            section_bar_path = os.path.join("static", "images", "section_bar.png")
+
+            # Generate Visuals
+            generate_wordcloud(jd_text, wordcloud_path)
+            generate_snapshot(resume_path, resume_snapshot)
+            generate_snapshot(jd_path, jd_snapshot)
+            save_score_donut(score, donut_path)
+            save_section_bar_chart(section_results, section_bar_path)
+
+            print("✅ Visuals generated successfully.")
+
+            # Generate Recommendations
+            recommendation = generate_recommendation(score, section_results)
+            print(f"✅ Recommendation Generated: {recommendation}")
+
+            # Generate Report Path and File
+            report_filename = f"{name.replace(' ', '_')}_report.docx"
+            report_path = os.path.join(app.config['REPORT_FOLDER'], report_filename)
+            generate_report(name, email, job, score, section_results, 
+                            wordcloud_path, resume_snapshot, jd_snapshot, donut_path, report_path)
+
+            print(f"✅ Report generated at {report_path}")
+
+            # Return Rendered Result Page
+            return render_template('index.html',
+                                   score=score,
+                                   section_results=section_results,
+                                   missing_keywords=missing_keywords,
+                                   recommendation=recommendation,
+                                   donut=url_for('static', filename='images/donut.png'),
+                                   section_bar=url_for('static', filename='images/section_bar.png'),
+                                   wordcloud=url_for('static', filename='images/wordcloud.png'),
+                                   resume_snapshot=url_for('static', filename='images/resume.png'),
+                                   jd_snapshot=url_for('static', filename='images/jd.png'))
+
+        except Exception as e:
+            print(f"❌ Error in Processing: {str(e)}")
+            return f"Internal Server Error: {str(e)}", 500
+
+    # Display the Form if GET request
     return render_template('index.html')
 
 @app.route('/download_report')
