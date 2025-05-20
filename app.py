@@ -21,15 +21,20 @@ def extract_text_from_pdf(pdf_path):
     doc = fitz.open(pdf_path)
     return "".join([page.get_text() for page in doc])
 
-def generate_wordcloud(text, path):
-    wc = WordCloud(width=400, height=200, background_color='white').generate(text)
-    wc.to_file(os.path.join("static/images", path))
+def generate_wordcloud(text, filename):
+    path = os.path.join('static/images', filename)
+    wc = WordCloud(width=800, height=400, background_color='white').generate(text)
+    wc.to_file(path)
+    return path
 
-def generate_snapshot(pdf_path, image_path):
+
+# Generate Snapshot
+def generate_snapshot(pdf_path, filename):
     doc = fitz.open(pdf_path)
     pix = doc[0].get_pixmap()
-    pix.save(os.path.join("static/images", image_path))
-
+    path = os.path.join('static/images', filename)
+    pix.save(path)
+    return path
 
 def calculate_similarity(text1, text2):
     tfidf = TfidfVectorizer(stop_words='english')
@@ -56,14 +61,16 @@ def extract_missing_keywords(jd_text, resume_text, top_n=10):
     jd_words = vectorizer.fit([jd_text]).get_feature_names_out()
     return [word for word in jd_words if word not in resume_text.lower()]
 
-def save_score_donut(score, path):
-    fig, ax = plt.subplots(figsize=(4, 4), subplot_kw=dict(aspect="equal"))
-    data = [score, 100 - score]
-    wedges, _ = ax.pie(data, wedgeprops=dict(width=0.3), startangle=90, colors=["#FFCF01", "#1C1C1C"])
-    ax.text(0, 0, f"{score}%", ha="center", va="center", fontsize=18, fontweight="bold")
+# Save Score Donut
+def save_score_donut(score, filename):
+    path = os.path.join('static/images', filename)
+    fig, ax = plt.subplots()
+    ax.pie([score, 100 - score], startangle=90, wedgeprops=dict(width=0.3), colors=['#FFCF01', '#1C1C1C'])
+    ax.text(0, 0, f'{score}%', ha='center', fontsize=18, fontweight='bold')
     plt.savefig(path, bbox_inches='tight')
     plt.close()
-
+    return path
+    
 def save_section_bar_chart(section_results, path):
     labels = list(section_results.keys())
     scores = [100 if val else 30 for val in section_results.values()]
@@ -158,12 +165,11 @@ def index():
             donut_path = "static/images/donut.png"
             section_bar_path = "static/images/section_bar.png"
             
-            # Generate Visuals
-            generate_wordcloud(jd_text, os.path.join("static/images", "wordcloud.png"))
-            generate_snapshot(resume_path, os.path.join("static/images", "resume.png"))
-            generate_snapshot(jd_path, os.path.join("static/images", "jd.png"))
-            save_score_donut(score, os.path.join("static/images", "donut.png"))
-            save_section_bar_chart(section_results, os.path.join("static/images", "section_bar.png"))
+           # Generate Visuals
+            wordcloud = generate_wordcloud(jd.read().decode(), 'wordcloud.png')
+            resume_snapshot = generate_snapshot(resume_path, 'resume.png')
+            jd_snapshot = generate_snapshot(jd_path, 'jd.png')
+            donut = save_score_donut(85, 'donut.png')
 
 
             print("✅ Visuals generated successfully.")
@@ -186,11 +192,10 @@ def index():
                                    section_results=section_results,
                                    missing_keywords=missing_keywords,
                                    recommendation=recommendation,
-                                   donut=url_for('static', filename='images/donut.png'),
-                                   section_bar=url_for('static', filename='images/section_bar.png'),
                                    wordcloud=url_for('static', filename='images/wordcloud.png'),
                                    resume_snapshot=url_for('static', filename='images/resume.png'),
-                                   jd_snapshot=url_for('static', filename='images/jd.png'))
+                                   jd_snapshot=url_for('static', filename='images/jd.png'),
+                                   donut=url_for('static', filename='images/donut.png'))
 
         except Exception as e:
             print(f"❌ Error in Processing: {str(e)}")
